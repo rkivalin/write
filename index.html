@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+<title>Write</title>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+<script type="text/javascript">
+
+var Write = function (node) {
+	if (!(this instanceof Write)) {
+		return new Write(node);
+	}
+
+	var self = this;
+	self.node = node;
+	var placeholder = self.placeholder = node.dataset.placeholder;
+
+	var trim = function (s) {
+		return s.replace(/^\s+|\s+$/g, '');
+	};
+
+	node.innerHTML = '<div class=\'content\'></div><div class=\'editor\'><textarea></textarea></div>';
+
+	var contentNode = node.querySelector('.content');
+	var textarea = node.querySelector('.editor textarea');
+
+	var format = function (input) {
+		return '<p>' + input.replace(/^\s+|\s$/g, '').replace(/\n\n/g, '</p><p>').replace(/\s{2,}/g, ' ') + '</p>';
+	};
+
+	var updateContent = function () {
+		if (trim(textarea.value).length === 0) {
+			contentNode.innerHTML = '<p><span class=\'placeholder\'>' + placeholder + '</span></p>';
+		} else {
+			contentNode.innerHTML = format(textarea.value);
+		}
+	};
+
+	updateContent();
+
+	textarea.addEventListener('input', function () {
+		updateContent();
+	});
+};
+
+document.addEventListener('readystatechange', function () {
+    if (document.readyState === 'interactive') {
+        window.write = new Write(document.querySelector('#example'));
+    }
+});
+
+</script>
+<style type='text/css'>
+
+.write {
+	font-family: 'Open Sans', sans-serif;
+	outline: none;
+}
+
+.write p {
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin: 0px;
+	font-size: 14pt;
+}
+
+.write .editor textarea {
+	width: 100%;
+	height: 200px;
+	padding: 8px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 12pt;
+}
+
+.write .placeholder {
+	color: #808080;
+}
+
+</style>
+<style type='text/css'>
+
+#example {
+    margin: auto;
+    max-width: 600px;
+}
+
+</style>
+</head>
+<body>
+<div id='example' class='write' data-placeholder='Go on and write anything'></div>
+</body>
+</html>
