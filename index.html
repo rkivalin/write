@@ -3,12 +3,15 @@
 <head>
 <title>Write</title>
 <link href='https://fonts.googleapis.com/css?family=Open+Sans&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+<script type="text/javascript" src="minivents.js"></script>
 <script type="text/javascript">
 
 var Write = function (node) {
 	if (!(this instanceof Write)) {
 		return new Write(node);
 	}
+
+	Events(this);
 
 	var self = this;
 	self.node = node;
@@ -28,24 +31,36 @@ var Write = function (node) {
 	};
 
 	var updateContent = function () {
-		if (trim(textarea.value).length === 0) {
+		var source = textarea.value;
+		if (trim(source).length === 0) {
 			contentNode.innerHTML = '<p><span class=\'placeholder\'>' + placeholder + '</span></p>';
 		} else {
-			contentNode.innerHTML = format(textarea.value);
+			contentNode.innerHTML = format(source);
 		}
+		self.emit('change', source);
 	};
 
 	updateContent();
 
 	textarea.addEventListener('input', function () {
+		console.log('input');
 		updateContent();
 	});
+
+	self.setSource = function (source) {
+		textarea.value = source != null ? source : '';
+		updateContent();
+	};
 };
 
 document.addEventListener('readystatechange', function () {
-    if (document.readyState === 'interactive') {
-        window.write = new Write(document.querySelector('#example'));
-    }
+	if (document.readyState === 'interactive') {
+		var write = window.write = new Write(document.querySelector('#example'));
+		write.setSource(localStorage.source);
+		write.on('change', function (source) {
+			localStorage.source = source;
+		});
+	}
 });
 
 </script>
@@ -79,8 +94,8 @@ document.addEventListener('readystatechange', function () {
 <style type='text/css'>
 
 #example {
-    margin: auto;
-    max-width: 600px;
+	margin: auto;
+	max-width: 600px;
 }
 
 </style>
