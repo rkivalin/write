@@ -43,9 +43,43 @@ var Write = function (node) {
 	updateContent();
 
 	textarea.addEventListener('input', function () {
-		console.log('input');
 		updateContent();
 	});
+
+	var computeOffset = function (selection) {
+		var stopNode = selection.baseNode.parentNode;
+		var offset = selection.baseOffset;
+		for (var i = 0; i < contentNode.childNodes.length; i++) {
+			var node = contentNode.childNodes[i];
+			if (node === stopNode) {
+				return offset;
+			} else {
+				offset += node.innerText.length + 2;
+			}
+		}
+		return 0;
+	};
+
+	document.addEventListener('selectionchange', function () {
+		var selection = document.getSelection();
+		var it = selection.baseNode;
+		while (it != null && it !== contentNode) {
+			it = it.parentNode;
+		}
+		var inTextarea = document.activeElement === textarea;
+		if (!inTextarea) {
+			var inText = it === contentNode && selection.baseNode.nodeType === Node.TEXT_NODE;
+			if (inText) {
+				var offset = computeOffset(selection);
+				textarea.style.display = 'block';
+				textarea.setSelectionRange(offset, offset);
+			} else {
+				textarea.style.display = 'none';
+			}
+		}
+	});
+
+	textarea.style.display = 'none';
 
 	self.setSource = function (source) {
 		textarea.value = source != null ? source : '';
